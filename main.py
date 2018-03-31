@@ -6,14 +6,12 @@ from rendering_lib import render_table
 from enquiry import seat_avail
 import json
 from fcm import send_push
+import json
+import enquiry
+
 app = Flask(__name__)
 CREDS_FILE = './mysqlvm-details.json'
 
-# if __name__ == "__main__":
-#     # Setting debug to True enables debug output. This line should be
-#     # removed before deploying a production app.
-#     app.debug = True
-#     app.run()
 @app.route('/enquiry')
 def enquiry():
     return render_template('enquiry.html')
@@ -22,23 +20,12 @@ def enquiry():
 def index():
     return redirect(url_for('enquiry'))
 
-@app.route('/seatavail')
-def get_seat_avail():
-    jtrain = str(request.args['jtrain'])
-    jsrc = str(request.args['jsrc'])
-    jdst = str(request.args['jdst'])
-    jclass = str(request.args['jclass'])
-    jdate = str(request.args['jdate'])
-    quota = str(request.args['quota'])
-    return seat_avail(jtrain,jsrc,jdst,jclass,jdate,quota)
-
 @app.route('/service')
 def get_service():
     return render_template('service.html')
 
 @app.route('/register', methods=['POST'])
 def get_registered():
-    print(request.form)
     src = str(request.form['src']).split('-')[-1]
     dst = str(request.form['dst']).split('-')[-1]
     jdate = str(request.form['jdate'])
@@ -55,7 +42,10 @@ def get_direct_trains():
     with db.cursor() as cur:
         head, body = fetch_data(src,dst,jdate,direct_query,cur)
     db.close()
-    return "1:"+render_table("direct_tbl",head,body)
+    body = list(body)
+    body.insert(0, head)
+    body.insert(0,1)
+    return json.dumps(body, default=str)
 
 @app.route('/one_stop')
 def get_one_stop():
@@ -66,7 +56,10 @@ def get_one_stop():
     with db.cursor() as cur:
         head, body = fetch_data(src,dst,jdate,one_stop_query,cur)
     db.close()
-    return "2:"+render_table("one_stop_tbl",head,body)
+    body = list(body)
+    body.insert(0, head)
+    body.insert(0,2)
+    return json.dumps(body, default=str)
 
 @app.route('/two_stops')
 def get_two_stops():
@@ -77,8 +70,23 @@ def get_two_stops():
     with db.cursor() as cur:
         head, body = fetch_data(src,dst,jdate,two_stops_query,cur)
     db.close()
-    return "3:"+render_table("two_stops_tbl",head,body)
+    body = list(body)
+    body.insert(0, head)
+    body.insert(0,3)
+    return json.dumps(body, default=str)
 
+@app.route('/seat_avail')
+def get_seat_avail():
+    data = json.loads(request.args['data'])[2:]
+    print(data)
+    id_ = request.args['id']
+    cls_ = request.args['cls']
+    quota = request.args['quota']
+    jdate = request.args['jdate']
+    # return json.dumps(data);
+    return json.dumps([id_]+[seat_avail(i[0].split('-')[0], i[1].lower(), i[2].lower(), cls_.split('-')[1], jdate, quota.split('-')[1]) for i in data])
+
+'''
 @app.route('/get_paths',methods=['GET'])
 def get_paths_html():
     db = connect_to(CREDS_FILE)
@@ -91,6 +99,7 @@ def get_paths_html():
     head, body = fetch_data(src,dst,str(date),one_stop_query,db.cursor())
     responce_html=responce_html+"<label>One Stop Journey:</label>"+render_table("one_stop_tbl",head, body)
     return responce_html
+'''
 
 @app.errorhandler(500)
 def server_error(e):
