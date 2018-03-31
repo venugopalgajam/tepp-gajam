@@ -4,6 +4,9 @@ tbl_ids = { '1': '#direct_tbl', '2': '#one_stop_tbl', '3': '#two_stops_tbl' }
 function reg_submit() {
 	alert("we are running out of credits to get seat availability!! it will be back soon!!")
 }
+
+var names = ['direct_tbl', 'one_stop_tbl', 'two_stops_tbl'];
+
 function date_format(date_obj) {
 	var month = (date_obj.getMonth() + 1);
 	var day = date_obj.getDate();
@@ -31,30 +34,57 @@ function load_tables(response) {
 	$('#search').prop('disabled', false);
 }
 
-function load_table(response) {
-	tbl_id = response.slice(0, 1)
-	tbl = response.slice(2)
-	console.log(tbl_id)
-	console.log(tbl)
-	$(tbl_div_ids[tbl_id]).html(tbl)
-	$(document).ready(function () { $(tbl_ids[tbl_id]).DataTable(); });
+function load_table(response1) {
+	response = JSON.parse(response1);
+	tbl_id = response[0];
+	main = '<table class="table table-bordered table-hover table-striped table-condensed" id="'+names[tbl_id-1]+'">';
+	main += '<thead><tr>';
+	for(var i=0; i<response[1].length; i++) main += '<th>' + response[1][i] + '</th>';
+	main += '</tr></thead><tbody>';
+	for(var j=0;j<response.length-2;j++){
+		header = '<tr>';
+		for(var i=0; i<response[j+2].length; i++) header += '<td>' + response[j+2][i] + '</td>';
+		header += '</tr>';
+		main += header;
+	}
+	main += '</tbody></table>';
+	main += "<input type='hidden' id='json_"+tbl_id+"' value='"+response1+"'>";
+	$(tbl_div_ids[tbl_id]).html(main);
+	$(tbl_ids[tbl_id.toString()]).DataTable();
 }
+
+function fill_seat_avail(response){
+	console.log(response);
+}
+
 function query_submit() {
 	$('#search').prop('disabled', true);
+	$('#search').val('searching..');
 	src_val = $('#src').val();
 	dst_val = $('#dst').val();
 	jdate_val = $('#date').val();
 	cls_val = $('#cls').val();
+	quota_val = $('#quota').val();
 	if (src_val.length == 0 || dst_val.length == 0 || jdate_val.length == 0) {
 		window.alert('All fields are mandatory!!')
 		$('#search').prop('disabled', false);
 	}
 	else {
-		params = { src: src_val, dst: dst_val, jdate: jdate_val, cls: cls_val }
-		$.get('direct_trains', params, load_table)
-		$.get('one_stop', params, load_table)
-		$.get('two_stops', params.load_table)
-		// $.get('get_paths', params, load_tables)
+		params = { src: src_val, dst: dst_val, jdate: jdate_val, cls: cls_val };
+		$.get('direct_trains', params, load_table);
+		$.get('one_stop', params, load_table);
+		$.get('two_stops', params.load_table);
+		// $.get('get_paths', params, load_tables);
+		var jsInitChecktimer = setInterval (checkForJS_Finish, 500);
+		function checkForJS_Finish () {
+	        if (document.querySelector ("#direct_tbl") && document.querySelector ("#one_stop_tbl")) {
+	            clearInterval (jsInitChecktimer);
+	            console.log($('#json_1').val());
+	            $.get('seat_avail', {data: $('#json_1').val(), id: 1, cls: cls_val, quota: quota_val, jdate: jdate_val}, fill_seat_avail);
+	            // $.get('seat_avail', {data: $('#json_2').val(), id: 2, cls: cls_val, quota: quota_val, jdate: jdate_val}, fill_seat_avail);
+	            // $.get('seat_avail', {data: $('#json_3').val(), id: 3}, fill_seat_avail);
+	        }
+	    }
 	}
 }
 
