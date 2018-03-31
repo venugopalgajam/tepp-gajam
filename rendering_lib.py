@@ -1,6 +1,5 @@
 import datetime as dt
 
-from flask import render_template
 table="""<table class="table table-bordered table-hover table-striped table-condensed" id={{id_}}>{{thead}}{{tbody}}</table>"""
 th="""<th class="text-center {{class_}}">{{data}}</th>"""
 td="""<td class="text-center {{class_}}">{{data}}</td>"""
