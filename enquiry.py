@@ -15,6 +15,7 @@ def seat_avail(train, src, dst,jclass,jdate, quota):
     html = str(res.content)#.replace(' ','').replace('\t','').replace('\n','')
     matches = regex.findall(html)
     if matches is None or len(matches) == 0:
+        print('no match')
         return 'N/A'
     return matches[0].split('>')[1].split('<')[0]
     # print(res.content)
