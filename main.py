@@ -25,12 +25,16 @@ def index():
 @app.route('/seatavail')
 def get_seat_avail():
     jtrain = str(request.args['jtrain'])
-    jsrc = str(request.args['jsrc'])
-    jdst = str(request.args['jdst'])
-    jclass = str(request.args['jclass'])
+    jsrc = str(request.args['jsrc']).lower()
+    jdst = str(request.args['jdst']).lower()
+    jclass = str(request.args['jclass']).split('-')[-1]
     jdate = str(request.args['jdate'])
-    quota = str(request.args['quota'])
-    return seat_avail(jtrain,jsrc,jdst,jclass,jdate,quota)
+    quota = str(request.args['quota']).split('-')[-1]
+    res = dict()
+    res['id'] = r".{0}_{1}_{2}_{3}".format(jtrain,jsrc.upper(),jdst.upper(),jdate)
+    res['avail'] = seat_avail(jtrain,jsrc,jdst,jclass,jdate,quota)
+    #print(res)
+    return json.dumps(res)
 
 @app.route('/service')
 def get_service():
@@ -38,11 +42,12 @@ def get_service():
 
 @app.route('/register', methods=['POST'])
 def get_registered():
-    print(request.form)
-    src = str(request.form['src']).split('-')[-1]
-    dst = str(request.form['dst']).split('-')[-1]
-    jdate = str(request.form['jdate'])
+    #print(request.form)
+    # src = str(request.form['src']).split('-')[-1]
+    # dst = str(request.form['dst']).split('-')[-1]
+    # jdate = str(request.form['jdate'])
     sub_str = str(request.form['sub'])
+    print(sub_str)
     send_push(sub_str)
     return "hip hip hurray"
 

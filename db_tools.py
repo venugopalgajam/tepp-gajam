@@ -6,9 +6,10 @@ import json
 import MySQLdb
 
 direct_query = """
-select trn as Train, concat(src,"<br>",dt) as "Source<br>Dept_Time", concat(dst,"<br>",at) as "Destination<br>Arr_Time" , "loading.." as SEAT_AVAIL from
+select concat(trno,"<br>",trnm) as Train, concat(src,"<br>",dt) as "Source<br>Dept_Time", concat(dst,"<br>",at) as "Destination<br>Arr_Time" , concat("<span class=\\" avail ",trno,"_",src,"_",dst,"_",DATE(dt),"  \\">loading..</span> ") as SEAT_AVAIL from
 (select 
-concat(trains.train_no,"<br>",trains.train_name) as trn,
+trains.train_no as  trno,
+trains.train_name as trnm,
 hp1.stn_code as src,
 hp2.stn_code as dst,
 DATE("{{jdate}}") +INTERVAL to_seconds(hp1.dept_time)-to_seconds(DATE(now())) SECOND as dt,
@@ -24,16 +25,18 @@ hp1.hop_index < hp2.hop_index and
 (trains.jday & (1 << (WEEKDAY(DATE("{{jdate}}")- INTERVAL (hp1.sday-1) DAY)))) > 0
 ) as tbl order by at;"""
 
-one_stop_query= """select trn1 as Train1, concat(src1,'<br>',sdt1) as "Source <br> Dept_Time", concat(dst1,'<br>',dat1) as "Destination <br> Arr_Time", "loading.." as "SEAT_AVAIL", wt as "Waiting Time", trn2 as Train2 , concat(src2,'<br>',sdt2) as "Source<br> Dept_Time", concat(dst2,'<br>',dat2) as "Destination<br> Arr_Time", "loading.." as "SEAT_AVIBL"
+one_stop_query= """select concat(trno1,"<br>",trnm1) as Train1, concat(src1,'<br>',sdt1) as "Source <br> Dept_Time", concat(dst1,'<br>',dat1) as "Destination <br> Arr_Time",concat("<span class=\\" avail ",trno1,"_",src1,"_",dst1,"_",DATE(sdt1),"\\" >loading..</span> ")  as "SEAT_AVAIL", SEC_TO_TIME(wt) as "Waiting Time", concat(trno2,"<br>",trnm2) as Train2 , concat(src2,'<br>',sdt2) as "Source<br> Dept_Time", concat(dst2,'<br>',dat2) as "Destination<br> Arr_Time",concat("<span class=\\" avail ",trno2,"_",src2,"_",dst2,"_",DATE(sdt2),"\\" >loading..</span> ")  as "SEAT_AVIBL"
 from
 (
-    select concat(tr1.train_no,"<br>",tr1.train_name) trn1,
+    select tr1.train_no as trno1,
+    tr1.train_name trnm1,
     hp1.stn_code "src1",
     hp2.stn_code "dst1",
     (DATE("{{jdate}}") + INTERVAL (TO_SECONDS(hp1.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt1",
     (DATE("{{jdate}}")+  INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp2.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat1",
-    SEC_TO_TIME( to_seconds(hp3.dept_time)-to_seconds(hp2.arr_time) ) as "wt", 
-    concat(tr2.train_no,"<br>",tr2.train_name) trn2,
+    ( to_seconds(hp3.dept_time)-to_seconds(hp2.arr_time) ) as "wt", 
+    tr2.train_no trno2,
+    tr2.train_name trnm2,
     hp2.stn_code "src2",
     hp4.stn_code "dst2",
     (DATE("{{jdate}}") + INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp3.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt2",
@@ -59,13 +62,15 @@ from
     hp2.arr_time < hp3.dept_time
     union
 
-    select concat(tr1.train_no,"<br>",tr1.train_name) trn1,
+    select tr1.train_no trno1,
+    tr1.train_name trnm1,
     hp1.stn_code "src1",
     hp2.stn_code "dst1",
     (DATE("{{jdate}}") + INTERVAL (TO_SECONDS(hp1.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt1",
     (DATE("{{jdate}}")+  INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp2.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat1",
-    SEC_TO_TIME(TO_SECONDS(hp3.dept_time)-to_seconds(hp2.arr_time) + 24*60*60) AS "wt",
-    concat(tr2.train_no,"<br>",tr2.train_name) trn2,
+    (TO_SECONDS(hp3.dept_time)-to_seconds(hp2.arr_time) + 24*60*60) AS "wt",
+    tr2.train_no as trno2,
+    tr2.train_name as  trnm2,
     hp2.stn_code "src2",
     hp4.stn_code "dst2",
     (DATE("{{jdate}}") + INTERVAL ((hp2.sday-hp1.day+1)*24*60*60 + TO_SECONDS(hp3.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt2",
@@ -88,7 +93,7 @@ from
     tr1.train_no <> tr2.train_no and
     (tr1.jday & (1 << (WEEKDAY("{{jdate}}"- INTERVAL (hp1.sday-1) DAY)))) > 0 and
     (tr2.jday & (1 << WEEKDAY("{{jdate}}" + INTERVAL hp2.sday-hp1.day+1 DAY))) > 0
-) as tbl order by dat2,wt limit 60;
+) as tbl where wt < 12*60*60  order by dat2,wt  limit 60;
 """
 
 two_stops_query = """"""

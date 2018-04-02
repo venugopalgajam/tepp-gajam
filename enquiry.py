@@ -5,6 +5,7 @@ api_details = json.load(open('./trainapi.json'))
 regex = re.compile(api_details['seat_regex'])
 url_template =  api_details['seat_endpt']
 def seat_avail(train, src, dst,jclass,jdate, quota):
+    # print(train,src,dst,jdate, jclass,quota)
     qry_url = url_template.replace('<train>',str(train)).replace('<src>',str(src).lower()).replace('<dst>',str(dst).lower()).replace('<jclass>',str(jclass).upper()).replace('<jdate>',str(jdate)).replace('<quota>',quota)
     # print(qry_url)
     res = requests.get(qry_url)
