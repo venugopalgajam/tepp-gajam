@@ -9,7 +9,7 @@ body
 table
 {
     border-collapse: separate;
-    counter-reset: Serial; 
+    counter-reset: Serial;
 }
 
 tr td:first-child:before
@@ -18,9 +18,11 @@ tr td:first-child:before
   content: counter(Serial); /* Display the counter */
 }
 
-th{
+tr th{
 	text-align: center;
+	background-color: gray;
+	color: white;
 }
-td{
+tr td{
 	text-align: center;
 }

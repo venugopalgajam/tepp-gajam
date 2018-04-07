@@ -74,6 +74,9 @@ def get_direct_trains():
     dst = str(request.args['dst']).split('-')[-1]
     jdate = str(request.args['jdate'])
     jclass = str(request.args['jclass'])
+    db=connect_to(CREDS_FILE)
+    with db.cursor() as cur:
+        head, body = fetch_data(src,dst,jdate,jclass,direct_query,cur)
     offset = str(request.args['offset'])
     db=connect_to(CREDS_FILE)
     with db.cursor() as cur:
@@ -91,6 +94,9 @@ def get_one_stop():
     dst = str(request.args['dst']).split('-')[-1]
     jdate = str(request.args['jdate'])
     jclass = str(request.args['jclass'])
+    db=connect_to(CREDS_FILE)
+    with db.cursor() as cur:
+        head, body = fetch_data(src,dst,jdate,jclass,one_stop_query,cur)
     offset = str(request.args['offset'])
     db=connect_to(CREDS_FILE)
     with db.cursor() as cur:
@@ -108,6 +114,9 @@ def get_two_stops():
     dst = str(request.args['dst']).split('-')[-1]
     jdate = str(request.args['jdate'])
     jclass = str(request.args['jclass'])
+    db=connect_to(CREDS_FILE)
+    with db.cursor() as cur:
+        head, body = fetch_data(src,dst,jdate,jclass,two_stops_query,cur)
     offset = str(request.args['offset'])
     db=connect_to(CREDS_FILE)
     with db.cursor() as cur:

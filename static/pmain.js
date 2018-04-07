@@ -2,7 +2,7 @@
 
 const applicationServerPublicKey = 'BI4-CWYfOMBYATgjTKspWBIWFr1ONrW1V7nRSJt-UWG0MyBvxFIny_UBmshqnynMVfIAFcieh-GY2F9-5XLLMs0';
 
-const pushButton = document.querySelector('.js-push-btn');
+const pushButton = document.querySelector('#js-push-btn');
 
 var sub_str = null;
 let isSubscribed = false;
@@ -94,6 +94,7 @@ function updateSubscriptionOnServer(subscription) {
 function updateBtn() {
   if (Notification.permission === 'denied') {
     pushButton.textContent = 'Push Messaging Blocked.';
+    $(pushButton).attr('class', 'btn');
     pushButton.disabled = true;
     updateSubscriptionOnServer(null);
     return;
@@ -101,8 +102,10 @@ function updateBtn() {
 
   if (isSubscribed) {
     pushButton.textContent = 'Disable Push Notifications';
+    $(pushButton).attr('class', 'btn btn-danger');
   } else {
     pushButton.textContent = 'Enable Push Notifications';
+    $(pushButton).attr('class', 'btn btn-success');
   }
 
   pushButton.disabled = false;

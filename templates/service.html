@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>TEPP</title>
+    <title>TrainEnquiry++</title>
     <link rel="shortcut icon" href="/static/train.ico"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="static/main.css" />
@@ -13,7 +13,7 @@
 <body>
     <!-- <header class="page-header text-center"><h1>Train Enquiry Plus Plus</h1></header> -->
     
-    <nav class="navbar navbar-default">
+    <nav class="navbar navbar-default navbar-inverse">
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/enquiry">TrainEnquiry++</a>
@@ -85,10 +85,10 @@
         </div>
 
         <div class="form-group">
-        <button type="button" id="register" onclick="register_push()" class="btn btn-primary">Register</button>
+        <button type="button" id="register" onclick="register_push()" class="btn btn-primary"><span class="glyphicon glyphicon-saved"></span> Register</button>
         </div>
-        <button type="button" class="btn bt-primary js-push-btn">
-            Enable Push Notifications
+        <button type="button" id="js-push-btn" class="btn btn-success">
+             Enable Push Notifications
         </button>
     </form>
     <footer class="container row">
