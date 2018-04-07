@@ -1,6 +1,7 @@
 console.log('main.js is loading...')
 tbl_div_ids = { '1': '#direct_div', '2': '#one_stop_div', '3': '#two_stops_div' }
 tbl_ids = { '1': '#direct_tbl', '2': '#one_stop_tbl', '3': '#two_stops_tbl' }
+names = {'1': 'direct_tbl', '2': 'one_stop_tbl', '3': 'two_stops_tbl'};
 var cls_val,quota_val;
 function reg_submit() {
 	alert("we are running out of credits to get seat availability!! it will be back soon!!")
@@ -29,6 +30,7 @@ function seat_avail_cb(res){
 	cells = $(obj["id"]).html(obj["avail"]);
 	$(obj["id"]).attr('class','availed');
 	if($('.avail').length==0){
+		console.log('datatable');
 		$(tbl_ids["1"]).DataTable();
 		$(tbl_ids["2"]).DataTable();
 		$(tbl_ids["3"]).DataTable();
@@ -55,15 +57,16 @@ function load_table(response1) {
 	response = JSON.parse(response1);
 	tbl_id = response['type'];
 	if(tbl_id=='1'){
-		main = '<table class="table table-bordered table-hover table-striped table-condensed display compact" id="'+tbl_div_ids[tbl_id]+'">';
+		main = '<table class="table table-bordered table-hover table-striped table-condensed display compact" id="'+names[tbl_id]+'">';
 		main += '<thead><tr>';
+		main += '<th>S.No.</th>';
 		main += '<th>' + response['head'][0] + '<br>' + response['head'][1] + '</th>';
 		main += '<th>' + response['head'][2] + '<br>' + response['head'][3] + '</th>';
 		main += '<th>' + response['head'][4] + '<br>' + response['head'][5] + '</th>';
 		main += '<th>SEAT AVAILABILITY</th>';
 		main += '</tr></thead><tbody>';
 		for(var j=0;j<response['body'].length;j++){
-			header = '<tr>';
+			header = '<tr><td></td>';
 			header += '<td>' + response['body'][j][0] + '<br>' + response['body'][j][1] + '</td>';
 			header += '<td>' + response['body'][j][2] + '<br>' + response['body'][j][3] + '</td>';
 			header += '<td>' + response['body'][j][4] + '<br>' + response['body'][j][5] + '</td>';
@@ -76,8 +79,9 @@ function load_table(response1) {
 	}
 
 	else if(tbl_id=='2'){
-		main = '<table class="table table-bordered table-hover table-striped table-condensed display compact" id="'+tbl_div_ids[tbl_id]+'">';
+		main = '<table class="table table-bordered table-hover table-striped table-condensed display compact" id="'+names[tbl_id]+'">';
 		main += '<thead><tr>';
+		main += '<th>S.No.</th>';
 		main += '<th>' + response['head'][0] + '<br>' + response['head'][1] + '</th>';
 		main += '<th>' + response['head'][2] + '<br>' + response['head'][3] + '</th>';
 		main += '<th>' + response['head'][4] + '<br>' + response['head'][5] + '</th>';
@@ -89,7 +93,7 @@ function load_table(response1) {
 		main += '<th>SEAT AVAILABILITY2</th>';
 		main += '</tr></thead><tbody>';
 		for(var j=0;j<response['body'].length;j++){
-			header = '<tr>';
+			header = '<tr><td></td>';
 			header += '<td>' + response['body'][j][0] + '<br>' + response['body'][j][1] + '</td>';
 			header += '<td>' + response['body'][j][2] + '<br>' + response['body'][j][3] + '</td>';
 			header += '<td>' + response['body'][j][4] + '<br>' + response['body'][j][5] + '</td>';
@@ -109,7 +113,6 @@ function load_table(response1) {
 		
 	// main += "<input type='hidden' id='json_"+tbl_id+"' value='"+response1+"'>";
 	$(tbl_div_ids[tbl_id]).html(main);
-	$(tbl_ids[tbl_id.toString()]).DataTable();
 	load_seat_avails();
 }
 function query_submit() {
