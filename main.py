@@ -1,11 +1,13 @@
 import datetime as dt
-import logging
-from flask import Flask, redirect, render_template, request, url_for
-from db_tools import connect_to, fetch_data, one_stop_query, direct_query, two_stops_query
-from rendering_lib import render_table
-from enquiry import seat_avail
 import json
-from fcm import send_push
+import logging
+
+from flask import Flask, redirect, render_template, request, url_for
+
+from db_tools import connect_to, direct_query, fetch_data, one_stop_query,two_stops_query
+from rendering_lib import render_table
+from utils import seat_avail, send_push
+
 app = Flask(__name__)
 CREDS_FILE = './mysqlvm-details.json'
 
@@ -102,4 +104,3 @@ def server_error(e):
     # Log the error and stacktrace.
     logging.exception('An error occurred during a request.')
     return 'An internal error occurred.', 500
-
