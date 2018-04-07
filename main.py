@@ -57,7 +57,7 @@ def get_registered():
     cur_date = int(float(request.form['cur_date']))
     db=connect_to(CREDS_FILE)
     with db.cursor() as cur:
-        head, body = fetch_data(src,dst,jdate,direct_query,cur)
+        head, body = fetch_data(src,dst,jdate,jclass,direct_query,cur)
     db.close()
     trn_idx = list(head).index('Train_No')
     dt_idx = list(head).index('Dept_Time')
@@ -73,9 +73,11 @@ def get_direct_trains():
     src = str(request.args['src']).split('-')[-1]
     dst = str(request.args['dst']).split('-')[-1]
     jdate = str(request.args['jdate'])
+    jclass = str(request.args['jclass'])
+    offset = str(request.args['offset'])
     db=connect_to(CREDS_FILE)
     with db.cursor() as cur:
-        head, body = fetch_data(src,dst,jdate,direct_query,cur)
+        head, body = fetch_data(src,dst,jdate,jclass,direct_query,cur,offset)
     db.close()
     response = {}
     response['head'] = head
@@ -88,9 +90,11 @@ def get_one_stop():
     src = str(request.args['src']).split('-')[-1]
     dst = str(request.args['dst']).split('-')[-1]
     jdate = str(request.args['jdate'])
+    jclass = str(request.args['jclass'])
+    offset = str(request.args['offset'])
     db=connect_to(CREDS_FILE)
     with db.cursor() as cur:
-        head, body = fetch_data(src,dst,jdate,one_stop_query,cur)
+        head, body = fetch_data(src,dst,jdate,jclass,one_stop_query,cur, offset)
     db.close()
     response = {}
     response['head'] = head
@@ -103,28 +107,17 @@ def get_two_stops():
     src = str(request.args['src']).split('-')[-1]
     dst = str(request.args['dst']).split('-')[-1]
     jdate = str(request.args['jdate'])
+    jclass = str(request.args['jclass'])
+    offset = str(request.args['offset'])
     db=connect_to(CREDS_FILE)
     with db.cursor() as cur:
-        head, body = fetch_data(src,dst,jdate,two_stops_query,cur)
+        head, body = fetch_data(src,dst,jdate,jclass,two_stops_query,cur,offset)
     db.close()
     response = {}
     response['head'] = head
     response['body'] = body
     response['type'] = 3
     return json.dumps(response, default=str)
-
-@app.route('/get_paths',methods=['GET'])
-def get_paths_html():
-    db = connect_to(CREDS_FILE)
-    src = str(request.args.get('src','')).split('-')[-1]
-    dst = str(request.args.get('dst','')).split('-')[-1]
-    date = str(request.args.get('jdate',''))
-    responce_html =""
-    head, body = fetch_data(src,dst,str(date),direct_query,db.cursor())
-    responce_html=responce_html+ "<label>Direct Trains:</label>"+render_table("direct_tbl",head, body)
-    head, body = fetch_data(src,dst,str(date),one_stop_query,db.cursor())
-    responce_html=responce_html+"<label>One Stop Journey:</label>"+render_table("one_stop_tbl",head, body)
-    return responce_html
 
 @app.errorhandler(500)
 def server_error(e):

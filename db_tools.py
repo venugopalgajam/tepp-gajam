@@ -23,7 +23,7 @@ hp1.train_no = trains.train_no and
 hp2.train_no = trains.train_no and 
 hp1.hop_index < hp2.hop_index and
 (trains.jday & (1 << (WEEKDAY(DATE("{{jdate}}")- INTERVAL (hp1.sday-1) DAY)))) > 0
-) as tbl order by at,dt limit 60*{{offset}},60;"""
+) as tbl order by at,dt limit {{offset}},60;"""
 
 one_stop_query= """select trno1 as Train1_No, trnm1 as Train1_Name, src1 as Source1,sdt1 as Dept_Time1, dst1 as Destination1, dat1 as Arr_Time1, SEC_TO_TIME(wt) as Waiting_Time ,trno2 as Train2_No,trnm2 as Train2_Name, src2 as Source2, sdt2 as Dept_Time2, dst2 as Destination2, dat2 as Arr_Time2
 from
@@ -93,7 +93,7 @@ from
     tr1.train_no <> tr2.train_no and
     (tr1.jday & (1 << (WEEKDAY("{{jdate}}"- INTERVAL (hp1.sday-1) DAY)))) > 0 and
     (tr2.jday & (1 << WEEKDAY("{{jdate}}" + INTERVAL hp2.sday-hp1.day+1 DAY))) > 0
-) as tbl where wt < 12*60*60  order by dat2,sdt1  limit 60*{{offset}},60;
+) as tbl where wt < 12*60*60  order by dat2,sdt1  limit {{offset}},60;
 """
 
 two_stops_query = """"""
@@ -104,7 +104,7 @@ def connect_to(creds_file):
 def fetch_data(src,dst,jdate,jclass,qry_template,ptr,offset=0):
     if len(qry_template) <=0:
         return None, None
-    qry = str(qry_template).replace('{{src}}',src).replace('{{dst}}',dst).replace('{{jdate}}',jdate).replace('{{offset}}',offset).replace('{{jclass}}',jclass)
+    qry = str(qry_template).replace('{{src}}',src).replace('{{dst}}',dst).replace('{{jdate}}',jdate).replace('{{offset}}',str(60*offset)).replace('{{jclass}}',jclass)
     #file =open('./op.txt','w');file.write(qry);file.close()
     ptr.execute(qry)
     columns = [tpl[0] for tpl in ptr.description]

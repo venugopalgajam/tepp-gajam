@@ -2,7 +2,7 @@ console.log('main.js is loading...')
 tbl_div_ids = { '1': '#direct_div', '2': '#one_stop_div', '3': '#two_stops_div' }
 tbl_ids = { '1': '#direct_tbl', '2': '#one_stop_tbl', '3': '#two_stops_tbl' }
 names = {'1': 'direct_tbl', '2': 'one_stop_tbl', '3': 'two_stops_tbl'};
-var cls_val,quota_val;
+var cls_val,quota_val,offset=-1;
 function reg_submit() {
 	alert("we are running out of credits to get seat availability!! it will be back soon!!")
 }
@@ -123,11 +123,12 @@ function query_submit() {
 	cls_val = $('#cls').val();
 	quota_val = $('#quota').val();
 	if (src_val.length == 0 || dst_val.length == 0 || jdate_val.length == 0) {
-		window.alert('All fields are mandatory!!')
+		window.alert('All fields are mandatory!!');
 		$('#search').prop('disabled', false);
 	}
 	else {
-		params = { src: src_val, dst: dst_val, jdate: jdate_val, cls: cls_val }
+		offset++;
+		params = { src: src_val, dst: dst_val, jdate: jdate_val, jclass: cls_val, offset:offset };
 		$.get('direct_trains', params, load_table);
 		$.get('one_stop', params, load_table);
 		// $.get('two_stops', params.load_table)
