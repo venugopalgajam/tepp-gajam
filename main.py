@@ -61,7 +61,7 @@ def get_registered():
     trains = [row[trn_idx] for row in body]
     print(trains)
     print(sub_str)
-    check_cnt = cur_date
+    check_cnt = 
     Thread(target=curravail_thread,args=(trains,src,dst,jclass,quota,jdate,check_cnt,sub_str)).start()
     send_push(sub_str,"Sample notification!")
     return "Registered Successfully!!"
