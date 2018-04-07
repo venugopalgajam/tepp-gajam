@@ -6,7 +6,7 @@ import json
 import MySQLdb
 
 direct_query = """
-select concat(trno,"<br>",trnm) as Train, concat(src,"<br>",dt) as "Source<br>Dept_Time", concat(dst,"<br>",at) as "Destination<br>Arr_Time" , concat("<span class=\\" avail ",trno,"_",src,"_",dst,"_",DATE(dt),"  \\">loading..</span> ") as SEAT_AVAIL from
+select trno as Train_No, trnm as Train, src as Source, dt as Dept_Time, dst as Destination, at as Arr_Time from
 (select 
 trains.train_no as  trno,
 trains.train_name as trnm,
@@ -25,7 +25,7 @@ hp1.hop_index < hp2.hop_index and
 (trains.jday & (1 << (WEEKDAY(DATE("{{jdate}}")- INTERVAL (hp1.sday-1) DAY)))) > 0
 ) as tbl order by at;"""
 
-one_stop_query= """select concat(trno1,"<br>",trnm1) as Train1, concat(src1,'<br>',sdt1) as "Source <br> Dept_Time", concat(dst1,'<br>',dat1) as "Destination <br> Arr_Time",concat("<span class=\\" avail ",trno1,"_",src1,"_",dst1,"_",DATE(sdt1),"\\" >loading..</span> ")  as "SEAT_AVAIL", SEC_TO_TIME(wt) as "Waiting Time", concat(trno2,"<br>",trnm2) as Train2 , concat(src2,'<br>',sdt2) as "Source<br> Dept_Time", concat(dst2,'<br>',dat2) as "Destination<br> Arr_Time",concat("<span class=\\" avail ",trno2,"_",src2,"_",dst2,"_",DATE(sdt2),"\\" >loading..</span> ")  as "SEAT_AVIBL"
+one_stop_query= """select trno1 as Train1_No, trnm1 as Train1_Name, src1 as Source1,sdt1 as Dept_Time1, dst1 as Destination1, dat1 as Arr_Time1, SEC_TO_TIME(wt) as Waiting_Time ,trno2 as Train2_No,trnm2 as Train2_Name, src2 as Source2, sdt2 as Dept_Time2, dst2 as Destination2, dat2 as Arr_Time2
 from
 (
     select tr1.train_no as trno1,
