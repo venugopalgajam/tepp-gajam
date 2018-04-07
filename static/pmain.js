@@ -1,24 +1,3 @@
-/*
-*
-*  Push Notifications codelab
-*  Copyright 2015 Google Inc. All rights reserved.
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      https://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License
-*
-*/
-
-/* eslint-env browser, es6 */
-
 'use strict';
 
 const applicationServerPublicKey = 'BI4-CWYfOMBYATgjTKspWBIWFr1ONrW1V7nRSJt-UWG0MyBvxFIny_UBmshqnynMVfIAFcieh-GY2F9-5XLLMs0';
@@ -151,9 +130,8 @@ function unsubscribeUser() {
 
 function register_push() {
   $('#register').prop('disabled', true);
-  if(!isSubscribed){
-    alert('enable push notifications and register!!')
-  }
+  if(!isSubscribed)
+    alert('enable push notifications and register!!');
   else{
     var src_val = $('#src').val();
     var dst_val = $('#dst').val();
@@ -161,11 +139,12 @@ function register_push() {
     var cls_val = $('#cls').val();
     var quota = $('#quota').val();
     if (src_val.length == 0 || dst_val.length == 0 || jdate_val.length == 0) {
-      window.alert('All fields are mandatory!!')
+      window.alert('All fields are mandatory!!');
       $('#register').prop('disabled', false);
     }
     else {
-      var params = { src: src_val, dst: dst_val, jdate: jdate_val, cls: cls_val, quota: quota, sub: sub_str }
+      cur_date_str = new Date().toISOString();
+      var params = { src: src_val, dst: dst_val, jdate: jdate_val, cls: cls_val, quota: quota, sub: sub_str, cur_date:cur_date_str};
       $.post('register', params, function (res) { alert('registered!!' + res); });
     }
   }

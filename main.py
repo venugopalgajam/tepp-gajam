@@ -1,12 +1,13 @@
 import datetime as dt
 import json
 import logging
+from threading import Thread
 
 from flask import Flask, redirect, render_template, request, url_for
 
 from db_tools import connect_to, direct_query, fetch_data, one_stop_query,two_stops_query
 from rendering_lib import render_table
-from utils import seat_avail, send_push
+from utils import seat_avail, send_push, curravail_thread
 
 app = Flask(__name__)
 CREDS_FILE = './mysqlvm-details.json'
@@ -44,14 +45,26 @@ def get_service():
 
 @app.route('/register', methods=['POST'])
 def get_registered():
-    #print(request.form)
-    # src = str(request.form['src']).split('-')[-1]
-    # dst = str(request.form['dst']).split('-')[-1]
-    # jdate = str(request.form['jdate'])
+    print(request.form)
+    src = str(request.form['src']).split('-')[-1]
+    dst = str(request.form['dst']).split('-')[-1]
+    jdate = str(request.form['jdate'])
+    jclass = str(request.form['jclass'])
     sub_str = str(request.form['sub'])
+    quota = str(request.form['quota'])
+    cur_date = str(request.form['cur_date'])
+    db=connect_to(CREDS_FILE)
+    with db.cursor() as cur:
+        head, body = fetch_data(src,dst,jdate,direct_query,cur)
+    db.close()
+    trn_idx = list(head).index('Train_No')
+    trains = [row[trn_idx] for row in body]
+    print(trains)
     print(sub_str)
-    send_push(sub_str)
-    return "hip hip hurray"
+    check_cnt = cur_date
+    Thread(target=curravail_thread,args=(trains,src,dst,jclass,quota,jdate,check_cnt,sub_str)).start()
+    send_push(sub_str,"Sample notification!")
+    return "Registered Successfully!!"
 
 @app.route('/direct_trains')
 def get_direct_trains():

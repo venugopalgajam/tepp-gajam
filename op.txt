@@ -5,15 +5,15 @@ from
     tr1.train_name trnm1,
     hp1.stn_code "src1",
     hp2.stn_code "dst1",
-    (DATE("2018-04-02") + INTERVAL (TO_SECONDS(hp1.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt1",
-    (DATE("2018-04-02")+  INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp2.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat1",
+    (DATE("2018-04-07") + INTERVAL (TO_SECONDS(hp1.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt1",
+    (DATE("2018-04-07")+  INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp2.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat1",
     ( to_seconds(hp3.dept_time)-to_seconds(hp2.arr_time) ) as "wt", 
     tr2.train_no trno2,
     tr2.train_name trnm2,
     hp2.stn_code "src2",
     hp4.stn_code "dst2",
-    (DATE("2018-04-02") + INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp3.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt2",
-    (DATE("2018-04-02") + INTERVAL ((hp2.sday-hp1.day+hp4.sday-hp3.day)*24*60*60 + TO_SECONDS(hp4.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat2"
+    (DATE("2018-04-07") + INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp3.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt2",
+    (DATE("2018-04-07") + INTERVAL ((hp2.sday-hp1.day+hp4.sday-hp3.day)*24*60*60 + TO_SECONDS(hp4.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat2"
     from 
         trains as tr1,
         (select * from hops where hops.stn_code = "MUGR" ) as hp1,
@@ -30,8 +30,8 @@ from
     hp3.hop_index < hp4.hop_index and 
     hp2.stn_code = hp3.stn_code and
     tr1.train_no <> tr2.train_no and
-    (tr1.jday & (1 << (WEEKDAY(DATE("2018-04-02")- INTERVAL (hp1.sday-1) DAY)))) > 0 and
-    (tr2.jday & (1 << (WEEKDAY(DATE("2018-04-02") + INTERVAL hp2.sday-hp1.day DAY)))) > 0 and 
+    (tr1.jday & (1 << (WEEKDAY(DATE("2018-04-07")- INTERVAL (hp1.sday-1) DAY)))) > 0 and
+    (tr2.jday & (1 << (WEEKDAY(DATE("2018-04-07") + INTERVAL hp2.sday-hp1.day DAY)))) > 0 and 
     hp2.arr_time < hp3.dept_time
     union
 
@@ -39,15 +39,15 @@ from
     tr1.train_name trnm1,
     hp1.stn_code "src1",
     hp2.stn_code "dst1",
-    (DATE("2018-04-02") + INTERVAL (TO_SECONDS(hp1.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt1",
-    (DATE("2018-04-02")+  INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp2.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat1",
+    (DATE("2018-04-07") + INTERVAL (TO_SECONDS(hp1.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt1",
+    (DATE("2018-04-07")+  INTERVAL ((hp2.sday-hp1.day)*24*60*60 + TO_SECONDS(hp2.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat1",
     (TO_SECONDS(hp3.dept_time)-to_seconds(hp2.arr_time) + 24*60*60) AS "wt",
     tr2.train_no as trno2,
     tr2.train_name as  trnm2,
     hp2.stn_code "src2",
     hp4.stn_code "dst2",
-    (DATE("2018-04-02") + INTERVAL ((hp2.sday-hp1.day+1)*24*60*60 + TO_SECONDS(hp3.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt2",
-    (DATE("2018-04-02") + INTERVAL ((hp2.sday-hp1.day+1+hp4.sday-hp3.day)*24*60*60 + TO_SECONDS(hp4.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat2"
+    (DATE("2018-04-07") + INTERVAL ((hp2.sday-hp1.day+1)*24*60*60 + TO_SECONDS(hp3.dept_time)-to_seconds(DATE(NOW()))) SECOND) "sdt2",
+    (DATE("2018-04-07") + INTERVAL ((hp2.sday-hp1.day+1+hp4.sday-hp3.day)*24*60*60 + TO_SECONDS(hp4.arr_time)-to_seconds(DATE(NOW()))) SECOND) "dat2"
     from 
         trains as tr1,
         (select * from hops where hops.stn_code = "MUGR" ) as hp1,
@@ -64,6 +64,6 @@ from
     hp3.hop_index < hp4.hop_index and 
     hp2.stn_code = hp3.stn_code  and
     tr1.train_no <> tr2.train_no and
-    (tr1.jday & (1 << (WEEKDAY("2018-04-02"- INTERVAL (hp1.sday-1) DAY)))) > 0 and
-    (tr2.jday & (1 << WEEKDAY("2018-04-02" + INTERVAL hp2.sday-hp1.day+1 DAY))) > 0
+    (tr1.jday & (1 << (WEEKDAY("2018-04-07"- INTERVAL (hp1.sday-1) DAY)))) > 0 and
+    (tr2.jday & (1 << WEEKDAY("2018-04-07" + INTERVAL hp2.sday-hp1.day+1 DAY))) > 0
 ) as tbl where wt < 12*60*60  order by dat2,wt  limit 60;

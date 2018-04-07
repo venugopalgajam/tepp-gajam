@@ -106,5 +106,5 @@ $(document).ready(function () {
 		source: stations,
 		minLength: 2
 	});
-	console.log("stations are loaded:" + stations.length);
+	console.log("No of stations loaded:" + stations.length);
 });
