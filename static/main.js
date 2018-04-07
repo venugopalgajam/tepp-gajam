@@ -25,15 +25,9 @@ function load_tables(response) {
 seat_cache = {};
 cnt = 0;
 function seat_avail_cb(res){
-	// console.log(res)
 	obj = JSON.parse(res);
-	console.log(obj)
 	cells = $(obj["id"]).html(obj["avail"]);
-	$(obj["id"]).attr('class','availed')
-	console.log(cells)
-	// for ( var i=0 ; i< cells.length;i++){
-	// 	$(cells[i]).html(res['avail'])
-	// }
+	$(obj["id"]).attr('class','availed');
 	if($('.avail').length==0){
 		$(tbl_ids["1"]).DataTable();
 		$(tbl_ids["2"]).DataTable();
@@ -42,31 +36,80 @@ function seat_avail_cb(res){
 	}
 }
 function load_seat_avails(){
-	var cells =$(".avail")
+	var cells = $(".avail");
 	for (var i=0;i<cells.length;i++){
-		console.log(cells[i])
 		if($(cells[i]).attr('class')==undefined)
 			continue;
-		key = $(cells[i]).attr('class').substr(7)
-		seat_cache[key] = "-1"
+		var key = $(cells[i]).attr('class').substr(6);
+		seat_cache[key] = "-1";
 	}
 	for(var key in seat_cache){
 		cnt++;
-		console.log(key)
-		args = key.split('_')
-		console.log(args)
+		args = key.split('_');
 		params = { jtrain:args[0],jsrc: args[1], jdst: args[2], jdate: args[3], jclass: cls_val,quota:quota_val }
 		$.get('seatavail', params, seat_avail_cb)
 	}
 }
-function load_table(response) {
-	tbl_id = response.slice(0, 1)
-	tbl = response.slice(2)
-	console.log(tbl_id)
-	// console.log(tbl)
-	$(tbl_div_ids[tbl_id]).html(tbl)
-	if(tbl_id=="2")load_seat_avails();
-	// $(document).ready(function () { $(tbl_ids[tbl_id]).DataTable(); });
+function load_table(response1) {
+	response = JSON.parse(response1);
+	tbl_id = response['type'];
+	if(tbl_id=='1'){
+		main = '<table class="table table-bordered table-hover table-striped table-condensed display compact" id="'+tbl_div_ids[tbl_id]+'">';
+		main += '<thead><tr>';
+		main += '<th>' + response['head'][0] + '<br>' + response['head'][1] + '</th>';
+		main += '<th>' + response['head'][2] + '<br>' + response['head'][3] + '</th>';
+		main += '<th>' + response['head'][4] + '<br>' + response['head'][5] + '</th>';
+		main += '<th>SEAT AVAILABILITY</th>';
+		main += '</tr></thead><tbody>';
+		for(var j=0;j<response['body'].length;j++){
+			header = '<tr>';
+			header += '<td>' + response['body'][j][0] + '<br>' + response['body'][j][1] + '</td>';
+			header += '<td>' + response['body'][j][2] + '<br>' + response['body'][j][3] + '</td>';
+			header += '<td>' + response['body'][j][4] + '<br>' + response['body'][j][5] + '</td>';
+			data = [response['body'][j][0],response['body'][j][2],response['body'][j][4],response['body'][j][3].substr(0,10)].join('_');
+			header += '<td><span class="avail ' + data + '">loading...</span></td>';
+			header += '</tr>';
+			main += header;
+		}
+		main += '</tbody></table>';
+	}
+
+	else if(tbl_id=='2'){
+		main = '<table class="table table-bordered table-hover table-striped table-condensed display compact" id="'+tbl_div_ids[tbl_id]+'">';
+		main += '<thead><tr>';
+		main += '<th>' + response['head'][0] + '<br>' + response['head'][1] + '</th>';
+		main += '<th>' + response['head'][2] + '<br>' + response['head'][3] + '</th>';
+		main += '<th>' + response['head'][4] + '<br>' + response['head'][5] + '</th>';
+		main += '<th>SEAT AVAILABILITY1</th>';
+		main += '<th>' + response['head'][6] + '</th>';
+		main += '<th>' + response['head'][7] + '<br>' + response['head'][8] + '</th>';
+		main += '<th>' + response['head'][9] + '<br>' + response['head'][10] + '</th>';
+		main += '<th>' + response['head'][11] + '<br>' + response['head'][12] + '</th>';
+		main += '<th>SEAT AVAILABILITY2</th>';
+		main += '</tr></thead><tbody>';
+		for(var j=0;j<response['body'].length;j++){
+			header = '<tr>';
+			header += '<td>' + response['body'][j][0] + '<br>' + response['body'][j][1] + '</td>';
+			header += '<td>' + response['body'][j][2] + '<br>' + response['body'][j][3] + '</td>';
+			header += '<td>' + response['body'][j][4] + '<br>' + response['body'][j][5] + '</td>';
+			data = [response['body'][j][0],response['body'][j][2],response['body'][j][4],response['body'][j][3].substr(0,10)].join('_');
+			header += '<td><span class="avail ' + data + '">loading...</span></td>';
+			header += '<td>' + response['body'][j][6] + '</td>';
+			header += '<td>' + response['body'][j][7] + '<br>' + response['body'][j][8] + '</td>';
+			header += '<td>' + response['body'][j][9] + '<br>' + response['body'][j][10] + '</td>';
+			header += '<td>' + response['body'][j][11] + '<br>' + response['body'][j][12] + '</td>';
+			data = [response['body'][j][7],response['body'][j][9],response['body'][j][11],response['body'][j][10].substr(0,10)].join('_');
+			header += '<td><span class="avail ' + data + '">loading...</span></td>';
+			header += '</tr>';
+			main += header;
+		}
+		main += '</tbody></table>';
+	}
+		
+	// main += "<input type='hidden' id='json_"+tbl_id+"' value='"+response1+"'>";
+	$(tbl_div_ids[tbl_id]).html(main);
+	$(tbl_ids[tbl_id.toString()]).DataTable();
+	load_seat_avails();
 }
 function query_submit() {
 	$('#search').prop('disabled', true);
@@ -81,9 +124,9 @@ function query_submit() {
 	}
 	else {
 		params = { src: src_val, dst: dst_val, jdate: jdate_val, cls: cls_val }
-		$.get('direct_trains', params, load_table)
-		$.get('one_stop', params, load_table)
-		$.get('two_stops', params.load_table)
+		$.get('direct_trains', params, load_table);
+		$.get('one_stop', params, load_table);
+		// $.get('two_stops', params.load_table)
 		// $.get('get_paths', params, load_tables)
 	}
 }

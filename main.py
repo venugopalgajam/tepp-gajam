@@ -75,7 +75,11 @@ def get_direct_trains():
     with db.cursor() as cur:
         head, body = fetch_data(src,dst,jdate,direct_query,cur)
     db.close()
-    return "1:"+render_table("direct_tbl",head,body)
+    response = {}
+    response['head'] = head
+    response['body'] = body
+    response['type'] = 1
+    return json.dumps(response, default=str)
 
 @app.route('/one_stop')
 def get_one_stop():
@@ -86,7 +90,11 @@ def get_one_stop():
     with db.cursor() as cur:
         head, body = fetch_data(src,dst,jdate,one_stop_query,cur)
     db.close()
-    return "2:"+render_table("one_stop_tbl",head,body)
+    response = {}
+    response['head'] = head
+    response['body'] = body
+    response['type'] = 2
+    return json.dumps(response, default=str)
 
 @app.route('/two_stops')
 def get_two_stops():
@@ -97,7 +105,11 @@ def get_two_stops():
     with db.cursor() as cur:
         head, body = fetch_data(src,dst,jdate,two_stops_query,cur)
     db.close()
-    return "3:"+render_table("two_stops_tbl",head,body)
+    response = {}
+    response['head'] = head
+    response['body'] = body
+    response['type'] = 3
+    return json.dumps(response, default=str)
 
 @app.route('/get_paths',methods=['GET'])
 def get_paths_html():
