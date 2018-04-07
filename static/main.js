@@ -49,6 +49,7 @@ function load_seat_avails(){
 		params = { jtrain:args[0],jsrc: args[1], jdst: args[2], jdate: args[3], jclass: cls_val,quota:quota_val }
 		$.get('seatavail', params, seat_avail_cb)
 	}
+	console.log('all requests sent');
 }
 function load_table(response1) {
 	response = JSON.parse(response1);

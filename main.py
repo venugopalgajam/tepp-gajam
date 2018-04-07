@@ -2,6 +2,7 @@ import datetime as dt
 import json
 import logging
 from threading import Thread
+import time
 
 from flask import Flask, redirect, render_template, request, url_for
 
@@ -17,6 +18,7 @@ CREDS_FILE = './mysqlvm-details.json'
 #     # removed before deploying a production app.
 #     app.debug = True
 #     app.run()
+
 @app.route('/enquiry')
 def enquiry():
     return render_template('enquiry.html')
@@ -52,18 +54,18 @@ def get_registered():
     jclass = str(request.form['jclass'])
     sub_str = str(request.form['sub'])
     quota = str(request.form['quota'])
-    cur_date = str(request.form['cur_date'])
+    cur_date = int(float(request.form['cur_date']))
     db=connect_to(CREDS_FILE)
     with db.cursor() as cur:
         head, body = fetch_data(src,dst,jdate,direct_query,cur)
     db.close()
     trn_idx = list(head).index('Train_No')
+    dt_idx = list(head).index('Dept_Time')
     trains = [row[trn_idx] for row in body]
-    print(trains)
-    print(sub_str)
-    check_cnt = 
-    Thread(target=curravail_thread,args=(trains,src,dst,jclass,quota,jdate,check_cnt,sub_str)).start()
-    send_push(sub_str,"Sample notification!")
+    max_timestamp = max([time.mktime(row[dt_idx].timetuple()) for row in body])
+    check_cnt = (1 if ((max_timestamp-cur_date)%(900)) > 0 else 0) + (max_timestamp-cur_date)//(900)
+    Thread(target=curravail_thread,args=(list(trains),src,dst,jclass,quota,jdate,check_cnt,sub_str)).start()
+    send_push(sub_str,"trains checked"+",".join(trains))
     return "Registered Successfully!!"
 
 @app.route('/direct_trains')

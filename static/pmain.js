@@ -143,8 +143,16 @@ function register_push() {
       $('#register').prop('disabled', false);
     }
     else {
-      cur_date_str = new Date().toISOString();
-      var params = { src: src_val, dst: dst_val, jdate: jdate_val, cls: cls_val, quota: quota, sub: sub_str, cur_date:cur_date_str};
+      var cur_date_str = (+new Date())/1000;
+      var params = { 
+        src: src_val, 
+        dst: dst_val, 
+        jdate: jdate_val, 
+        jclass: cls_val, 
+        quota: quota, 
+        sub: sub_str, 
+        cur_date:cur_date_str
+      };
       $.post('register', params, function (res) { alert('registered!!' + res); });
     }
   }

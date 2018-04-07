@@ -3,7 +3,6 @@ import re
 import time
 
 import requests
-
 from pywebpush import webpush
 
 PRIVATE_KEY = json.load(open('./fcm-creds.json'))['private_key']
@@ -46,25 +45,23 @@ def curravail_thread(trains,src,dst,jclass,quota,jdate,check_cnt,sub_str):
     data['jclass']=jclass
     data['quota']=quota
     while check_cnt > 0 and len(trains) > 0:
+        print(check_cnt)
+        new_trains = list()
         for train in trains:
+            print(train)
             res_str = seat_avail(train,src,dst,jclass,jdate,quota).strip()
-            if res_str.startswith('CURR'):
+            if res_str.startswith('CURR') or res_str.startswith('AVAIL'):
                 data['train']=train
                 data['avail']=res_str
                 return send_push(sub_str,json.dumps(data))
             elif res_str.startswith('TRAIN DEPARTED'):
-                trains.remove(train)
-        time.sleep(15*60)
+                print(train," departed!!")
+            else:
+                new_trains.append(str(train))
+        trains = list(new_trains)
+        # time.sleep(900)
         check_cnt -=1
     
-    for train in trains:
-        res_str = seat_avail(train,src,dst,jclass,jdate,quota)
-        if res_str.startswith('CURR'):
-            data['train']=train
-            data['avail']=res_str
-            return send_push(sub_str,json.dumps(data))
-        elif res_str.startswith('TRAIN DEPARTED'):
-            trains.remove(train)
     data['train']="N/A"
     data['avail']="Sorry!!"
-    return send_push(sub_str,json)
+    return send_push(sub_str,json.dumps(data))
