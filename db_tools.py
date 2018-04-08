@@ -93,7 +93,7 @@ from
     tr1.train_no <> tr2.train_no and
     (tr1.jday & (1 << (WEEKDAY("{{jdate}}"- INTERVAL (hp1.sday-1) DAY)))) > 0 and
     (tr2.jday & (1 << WEEKDAY("{{jdate}}" + INTERVAL hp2.sday-hp1.day+1 DAY))) > 0
-) as tbl where wt < 12*60*60  order by dat2,wt  limit 60;
+) as tbl where wt < 12*60*60  order by dat2,wt  limit 2;
 """
 
 two_stops_query = """"""

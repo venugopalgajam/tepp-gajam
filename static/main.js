@@ -15,14 +15,6 @@ function date_format(date_obj) {
 		day = "0" + day;
 	return date_obj.getFullYear() + '-' + month + '-' + day;
 }
-function load_tables(response) {
-	console.log('results are returned!');
-	$('#results').html(response);
-	$(document).ready(function () { $('#direct_tbl').DataTable(); });
-	$(document).ready(function () { $('#one_stop_tbl').DataTable(); });
-	// alert("we are running out of credits to get seat availability!! it will be back soon!!")
-	$('#search').prop('disabled', false);
-}
 seat_cache = {};
 cnt = 0;
 function seat_avail_cb(res){
@@ -30,10 +22,13 @@ function seat_avail_cb(res){
 	cells = $(obj["id"]).html(obj["avail"]);
 	$(obj["id"]).attr('class','availed');
 	if($('.avail').length==0){
-		console.log('datatable');
-		$(tbl_ids["1"]).DataTable();
-		$(tbl_ids["2"]).DataTable();
-		$(tbl_ids["3"]).DataTable();
+		var tb = $('.table').DataTable({
+			'retrieve':true,
+			'bJQueryUI':true,
+		});
+		tb
+		 .column( 1 ).search( 'VSKP' )
+		 .draw();
 		$('#search').prop('disabled',false);
 	}
 }
@@ -56,7 +51,7 @@ function load_table(response1) {
 	response = JSON.parse(response1);
 	tbl_id = response['type'];
 	if(tbl_id=='1'){
-		main = '<table class="table table-bordered table-hover table-striped table-condensed display compact" id="'+names[tbl_id]+'">';
+		main = '<table class="table table-bordered table-hover table-striped table-condensed" id="'+names[tbl_id]+'">';
 		main += '<thead><tr>';
 		main += '<th>S.No.</th>';
 		main += '<th>' + response['head'][0] + '<br>' + response['head'][1] + '</th>';
@@ -116,6 +111,7 @@ function load_table(response1) {
 }
 function query_submit() {
 	$('#search').prop('disabled', true);
+	$('#stxt').innerHTML = 'Searching..';
 	src_val = $('#src').val();
 	dst_val = $('#dst').val();
 	jdate_val = $('#date').val();
