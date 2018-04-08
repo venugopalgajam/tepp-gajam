@@ -90,13 +90,83 @@ from
     hp3.train_no = hp4.train_no and  
     hp3.hop_index < hp4.hop_index and 
     hp2.stn_code = hp3.stn_code  and
-    tr1.train_no <> tr2.train_no and
     (tr1.jday & (1 << (WEEKDAY("{{jdate}}"- INTERVAL (hp1.sday-1) DAY)))) > 0 and
     (tr2.jday & (1 << WEEKDAY("{{jdate}}" + INTERVAL hp2.sday-hp1.day+1 DAY))) > 0
 ) as tbl where wt < 12*60*60  order by dat2,sdt1  limit {{offset}},60;
 """
 
-two_stops_query = """"""
+two_stops_query = """
+select train1.train_no as Train1,
+train1.train_name as Train1_name, 
+hp1.stn_code Source1, 
+CONCAT(date("{{jdate}}")," ",hp1.dept_time) Dept_Time1,
+hp2.stn_code Destination1,
+concat(date("{{jdate}}")+interval hp2.sday-hp1.day day," ",hp2.arr_time) Arr_Time1,
+sec_to_time(24*60*60*(hp3.dept_time<hp2.arr_time)+to_seconds(hp3.dept_time)-to_seconds(hp2.arr_time)) Waiting_Time1,
+train2.train_no as Train2,
+train2.train_name as Train2_name, 
+hp3.stn_code Source2,
+concat(date("{{jdate}}")+interval hp2.sday-hp1.day+1*(hp3.dept_time<hp2.arr_time) day," ",hp3.dept_time) Dept_Time2,
+hp4.stn_code Destination2,
+concat(date("{{jdate}}")+interval hp2.sday-hp1.day+1*(hp3.dept_time<hp2.arr_time)+hp4.sday-hp3.day day," ",hp2.arr_time) Arr_Time2,
+sec_to_time(24*60*60*(hp5.dept_time<hp4.arr_time)+to_seconds(hp5.dept_time)-to_seconds(hp4.arr_time)) Waiting_Time2,
+train3.train_no as Train3,
+train3.train_name as Train3_name, 
+hp5.stn_code Source3, 
+concat(date("{{jdate}}")+interval hp2.sday-hp1.day+1*(hp3.dept_time<hp2.arr_time)+hp4.day-hp3.sday+1*(hp5.dept_time<hp6.arr_time) day," ",hp5.dept_time) Dept_Time3,
+hp6.stn_code Destination3,
+concat(date("{{jdate}}")+interval hp2.sday-hp1.day+1*(hp3.dept_time<hp2.arr_time)+hp4.day-hp3.sday+1*(hp5.dept_time<hp6.arr_time)+hp6.sday-hp5.day day," ",hp6.arr_time) Arr_Time3
+
+from
+(
+	trains train1
+	join hops hp1
+		on train1.train_no = hp1.train_no 
+        and (train1.jday & (1<<weekday(date("{{jdate}}") + interval (1- hp1.day) day))) >0
+        and hp1.stn_code="{{src}}" 
+        and train1.{{jclass}} = '1'
+	
+
+	join hops hp2
+		on train1.train_no = hp2.train_no 
+		and hp2.stn_code in (Select stn_code from top_stns) 
+		and hp1.hop_index < hp2.hop_index
+
+
+    join trains train2
+		on train2.{{jclass}}='1'
+	join hops as hp3
+		on train2.train_no = hp3.train_no
+        and hp3.stn_code = hp2.stn_code
+        and 
+        (
+			((train2.jday & (1<<weekday(date("{{jdate}}") + interval (hp2.sday- hp1.day) day))) >0 and hp3.dept_time > hp2.arr_time)
+            or
+            ((train2.jday & (1<<weekday(date("{{jdate}}") + interval (hp2.sday- hp1.day+1) day))) >0 and hp3.dept_time < hp2.arr_time)
+        )
+	join hops as hp4
+		on train2.train_no=hp4.train_no
+        and hp4.stn_code in (select stn_code from top_stns)
+        and hp4.hop_index > hp3.hop_index
+
+    join trains train3
+		on train3.{{jclass}}='1'
+	join hops as hp5
+		on train3.train_no = hp5.train_no
+        and hp5.stn_code = hp4.stn_code
+        and
+        (
+			((train3.jday & (1<<weekday(date("{{jdate}}") + interval (hp2.sday- hp1.day+1*(hp3.dept_time<hp2.arr_time)+hp4.sday-hp3.day) day))) >0 and hp5.dept_time > hp4.arr_time)
+            or
+            ((train2.jday & (1<<weekday(date("{{jdate}}") + interval (hp2.sday- hp1.day+1*(hp3.dept_time<hp2.arr_time)+hp4.sday-hp3.day+1) day))) >0 and hp5.dept_time < hp4.arr_time)
+		)
+	join hops as hp6
+		on train3.train_no=hp6.train_no
+        and hp6.stn_code="{{dst}}"
+        and hp6.hop_index > hp5.hop_index
+)
+order by date("{{jdate}}")+interval hp2.sday-hp1.day+1*(hp3.dept_time<hp2.arr_time)+hp4.sday-hp3.day+1*(hp5.dept_time<hp4.arr_time)+hp6.sday-hp5.day day,hp6.arr_time limit 30;
+"""
 def connect_to(creds_file):
     db_creds = json.load(open(creds_file))
     return MySQLdb.connect(host=db_creds['host'], user=db_creds['user'], port= db_creds['port'], passwd=db_creds['passwd'],db=db_creds['db'])
@@ -104,8 +174,9 @@ def connect_to(creds_file):
 def fetch_data(src,dst,jdate,jclass,qry_template,ptr,offset=0):
     if len(qry_template) <=0:
         return None, None
-    qry = str(qry_template).replace('{{src}}',src).replace('{{dst}}',dst).replace('{{jdate}}',jdate).replace('{{offset}}',str(60*offset)).replace('{{jclass}}',jclass)
-    #file =open('./op.txt','w');file.write(qry);file.close()
+    qry = str(qry_template).replace('{{src}}',src).replace('{{dst}}',dst).replace('{{jdate}}',jdate).replace('{{offset}}',str(60*int(offset))).replace('{{jclass}}',jclass)
+    # if qry_template==one_stop_query:
+    #     file =open('./op.txt','w');file.write(str(offset)+' '+qry);file.close()
     ptr.execute(qry)
     columns = [tpl[0] for tpl in ptr.description]
     return columns,ptr.fetchall()
