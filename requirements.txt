@@ -51,7 +51,7 @@ pytz==2018.3
 pywebpush==1.6.0
 PyYAML==3.12
 requests==2.18.4
-rsa==3.4.2
+rsa==4.7
 semantic-version==2.5.0
 singledispatch==3.4.0.3
 six==1.11.0
